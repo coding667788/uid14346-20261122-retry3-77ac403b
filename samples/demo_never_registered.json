@@ -1,0 +1,37 @@
+{
+  "case_id": "demo-never-registered",
+  "horizon": 4,
+  "domains": ["D1", "D2"],
+  "organizations": ["O1", "O2"],
+  "domain_organization": {"D1": "O1", "D2": "O2"},
+  "nodes": [
+    {"id": "L_KEEP1", "kind": "leaf", "credential": "C_KEEP1"},
+    {"id": "L_KEEP2", "kind": "leaf", "credential": "C_KEEP2"},
+    {"id": "L_GHOST", "kind": "leaf", "credential": "C_GHOST"},
+    {
+      "id": "T_KEEP",
+      "kind": "internal",
+      "recipes": [
+        {"id": "K1", "children": ["L_KEEP1"], "distinct_domains": 1},
+        {"id": "K2", "children": ["L_KEEP2"], "distinct_domains": 1}
+      ]
+    },
+    {
+      "id": "T_GHOST",
+      "kind": "internal",
+      "recipes": [
+        {"id": "G", "children": ["L_GHOST"], "distinct_domains": 1}
+      ]
+    }
+  ],
+  "credentials": [
+    {"id": "C_KEEP1", "initial_generation": 1, "domain": "D1", "custodian": "O1"},
+    {"id": "C_KEEP2", "initial_generation": 1, "domain": "D2", "custodian": "O2"},
+    {"id": "C_GHOST", "registered": false}
+  ],
+  "actions": [],
+  "objectives": [
+    {"target": "T_KEEP", "goal": "retain"},
+    {"target": "T_GHOST", "goal": "retire"}
+  ]
+}

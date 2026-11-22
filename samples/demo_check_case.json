@@ -1,0 +1,177 @@
+{
+  "case_id": "demo-custody-retirement-check",
+  "horizon": 9,
+  "domains": ["D_BEIJING", "D_CHENGDU", "D_GUANGZHOU", "D_SHANGHAI"],
+  "organizations": ["ORG_A", "ORG_B", "ORG_C", "ORG_D"],
+  "domain_organization": {
+    "D_BEIJING": "ORG_A",
+    "D_CHENGDU": "ORG_B",
+    "D_GUANGZHOU": "ORG_C",
+    "D_SHANGHAI": "ORG_D"
+  },
+  "nodes": [
+    {"id": "L_OLD_KEY", "kind": "leaf", "credential": "C_OLD_KEY"},
+    {"id": "L_OLD_SHARE1", "kind": "leaf", "credential": "C_OLD_SHARE1"},
+    {"id": "L_OLD_SHARE2", "kind": "leaf", "credential": "C_OLD_SHARE2"},
+    {"id": "L_KEEP_KEY", "kind": "leaf", "credential": "C_KEEP_KEY"},
+    {"id": "L_KEEP_REPLICA_A", "kind": "leaf", "credential": "C_KEEP_REPLICA_A"},
+    {"id": "L_KEEP_REPLICA_B", "kind": "leaf", "credential": "C_KEEP_REPLICA_B"},
+    {"id": "L_KEEP_REPLICA_C", "kind": "leaf", "credential": "C_KEEP_REPLICA_C"},
+    {
+      "id": "N_OLD_RECIPE",
+      "kind": "internal",
+      "recipes": [
+        {
+          "id": "OLD_3_WAY_DOMAIN_SPLIT",
+          "children": ["L_OLD_KEY", "L_OLD_SHARE1", "L_OLD_SHARE2"],
+          "distinct_domains": 3
+        },
+        {
+          "id": "OLD_DEGRADED_KEY_ONLY",
+          "children": ["L_OLD_KEY"],
+          "distinct_domains": 1
+        },
+        {
+          "id": "OLD_DEGRADED_SHARE1_ONLY",
+          "children": ["L_OLD_SHARE1"],
+          "distinct_domains": 1
+        },
+        {
+          "id": "OLD_DEGRADED_SHARE2_ONLY",
+          "children": ["L_OLD_SHARE2"],
+          "distinct_domains": 1
+        }
+      ]
+    },
+    {
+      "id": "T_OLD_BACKUP",
+      "kind": "internal",
+      "recipes": [
+        {
+          "id": "OLD_VIA_RECIPE",
+          "children": ["N_OLD_RECIPE"],
+          "distinct_domains": 0
+        }
+      ]
+    },
+    {
+      "id": "T_KEEP_BACKUP",
+      "kind": "internal",
+      "recipes": [
+        {"id": "KEEP_VIA_KEY", "children": ["L_KEEP_KEY"], "distinct_domains": 1},
+        {"id": "KEEP_VIA_REPLICA_A", "children": ["L_KEEP_REPLICA_A"], "distinct_domains": 1},
+        {"id": "KEEP_VIA_REPLICA_B", "children": ["L_KEEP_REPLICA_B"], "distinct_domains": 1},
+        {"id": "KEEP_VIA_REPLICA_C", "children": ["L_KEEP_REPLICA_C"], "distinct_domains": 1}
+      ]
+    }
+  ],
+  "credentials": [
+    {"id": "C_OLD_KEY", "initial_generation": 1, "domain": "D_BEIJING", "custodian": "ORG_A"},
+    {"id": "C_OLD_SHARE1", "initial_generation": 1, "domain": "D_CHENGDU", "custodian": "ORG_B"},
+    {"id": "C_OLD_SHARE2", "initial_generation": 1, "domain": "D_GUANGZHOU", "custodian": "ORG_C"},
+    {"id": "C_KEEP_KEY", "initial_generation": 1, "domain": "D_BEIJING", "custodian": "ORG_A"},
+    {"id": "C_KEEP_REPLICA_A", "initial_generation": 1, "domain": "D_BEIJING", "custodian": "ORG_A"},
+    {"id": "C_KEEP_REPLICA_B", "initial_generation": 1, "domain": "D_CHENGDU", "custodian": "ORG_B"},
+    {"id": "C_KEEP_REPLICA_C", "initial_generation": 1, "domain": "D_GUANGZHOU", "custodian": "ORG_C"}
+  ],
+  "actions": [
+    {
+      "id": "A_MIG_KEY_BJ_TO_SH",
+      "kind": "migrate",
+      "credential": "C_KEEP_KEY",
+      "from_domain": "D_BEIJING",
+      "to_domain": "D_SHANGHAI",
+      "custodian": "ORG_D",
+      "window_start": 1,
+      "window_end": 4,
+      "cost": 3
+    },
+    {
+      "id": "A_MIG_KEY_BJ_TO_CD_DECOY",
+      "kind": "migrate",
+      "credential": "C_KEEP_KEY",
+      "from_domain": "D_BEIJING",
+      "to_domain": "D_CHENGDU",
+      "custodian": "ORG_B",
+      "window_start": 1,
+      "window_end": 4,
+      "cost": 1
+    },
+    {
+      "id": "A_DESTROY_OLD_KEY",
+      "kind": "destroy",
+      "credential": "C_OLD_KEY",
+      "generation": 1,
+      "custodian": "ORG_A",
+      "window_start": 3,
+      "window_end": 6,
+      "cost": 2
+    },
+    {
+      "id": "A_RECEIPT_OLD_KEY",
+      "kind": "receipt",
+      "destroy_action": "A_DESTROY_OLD_KEY",
+      "confirmer": "ORG_D",
+      "window_start": 4,
+      "window_end": 8,
+      "cost": 1
+    },
+    {
+      "id": "A_DESTROY_OLD_SHARE1",
+      "kind": "destroy",
+      "credential": "C_OLD_SHARE1",
+      "generation": 1,
+      "custodian": "ORG_B",
+      "window_start": 4,
+      "window_end": 7,
+      "cost": 2
+    },
+    {
+      "id": "A_RECEIPT_OLD_SHARE1",
+      "kind": "receipt",
+      "destroy_action": "A_DESTROY_OLD_SHARE1",
+      "confirmer": "ORG_A",
+      "window_start": 5,
+      "window_end": 9,
+      "cost": 1
+    },
+    {
+      "id": "A_DESTROY_OLD_SHARE2",
+      "kind": "destroy",
+      "credential": "C_OLD_SHARE2",
+      "generation": 1,
+      "custodian": "ORG_C",
+      "window_start": 5,
+      "window_end": 8,
+      "cost": 2
+    },
+    {
+      "id": "A_RECEIPT_OLD_SHARE2",
+      "kind": "receipt",
+      "destroy_action": "A_DESTROY_OLD_SHARE2",
+      "confirmer": "ORG_B",
+      "window_start": 6,
+      "window_end": 9,
+      "cost": 1
+    }
+  ],
+  "policy_segments": [
+    {"target": "T_OLD_BACKUP", "retain": true, "start": 0, "end": 3},
+    {"target": "T_OLD_BACKUP", "retain": false, "start": 3, "end": 10}
+  ],
+  "objectives": [
+    {"target": "T_KEEP_BACKUP", "goal": "retain"},
+    {"target": "T_OLD_BACKUP", "goal": "retire"}
+  ],
+  "schedule": [
+    {"type": "wait"},
+    {"type": "migrate", "action_id": "A_MIG_KEY_BJ_TO_SH"},
+    {"type": "wait"},
+    {"type": "destroy", "action_id": "A_DESTROY_OLD_KEY"},
+    {"type": "destroy", "action_id": "A_DESTROY_OLD_SHARE1"},
+    {"type": "receipt", "action_id": "A_RECEIPT_OLD_KEY"},
+    {"type": "destroy", "action_id": "A_DESTROY_OLD_SHARE2"},
+    {"type": "receipt", "action_id": "A_RECEIPT_OLD_SHARE1"},
+    {"type": "receipt", "action_id": "A_RECEIPT_OLD_SHARE2"}
+  ]
+}

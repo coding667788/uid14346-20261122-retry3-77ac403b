@@ -1,0 +1,51 @@
+{
+  "case_id": "demo-pending-blocks-both-claims",
+  "horizon": 5,
+  "domains": ["D1", "D2", "D3"],
+  "organizations": ["O1", "O2", "O3"],
+  "domain_organization": {"D1": "O1", "D2": "O2", "D3": "O3"},
+  "nodes": [
+    {"id": "L_KEEP1", "kind": "leaf", "credential": "C_KEEP1"},
+    {"id": "L_KEEP2", "kind": "leaf", "credential": "C_KEEP2"},
+    {"id": "L_OLD", "kind": "leaf", "credential": "C_OLD"},
+    {
+      "id": "T_KEEP",
+      "kind": "internal",
+      "recipes": [
+        {"id": "K1", "children": ["L_KEEP1"], "distinct_domains": 1},
+        {"id": "K2", "children": ["L_KEEP2"], "distinct_domains": 1}
+      ]
+    },
+    {
+      "id": "T_OLD",
+      "kind": "internal",
+      "recipes": [
+        {"id": "OLD", "children": ["L_OLD"], "distinct_domains": 1}
+      ]
+    }
+  ],
+  "credentials": [
+    {"id": "C_KEEP1", "initial_generation": 1, "domain": "D1", "custodian": "O1"},
+    {"id": "C_KEEP2", "initial_generation": 1, "domain": "D2", "custodian": "O2"},
+    {"id": "C_OLD", "initial_generation": 1, "domain": "D3", "custodian": "O3"}
+  ],
+  "actions": [
+    {
+      "id": "DESTROY_OLD",
+      "kind": "destroy",
+      "credential": "C_OLD",
+      "generation": 1,
+      "custodian": "O3",
+      "window_start": 0,
+      "window_end": 6,
+      "cost": 2
+    }
+  ],
+  "objectives": [
+    {"target": "T_KEEP", "goal": "retain"},
+    {"target": "T_OLD", "goal": "retire"}
+  ],
+  "schedule": [
+    {"type": "destroy", "action_id": "DESTROY_OLD"}
+  ]
+}
